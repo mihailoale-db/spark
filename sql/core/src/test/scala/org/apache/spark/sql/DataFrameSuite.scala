@@ -2721,6 +2721,39 @@ class DataFrameSuite extends QueryTest
       parameters = Map("name" -> ".whatever")
     )
   }
+
+  test("Nested order by") {
+    val df = sql("SELECT * FROM VALUES(1, 5, 3), (4, 2, 6)")
+
+    val df1 = df.select("col1").orderBy("col2").orderBy("col3")
+    checkAnswer(df1, Seq(Row(1), Row(4)))
+
+    val df2 = df.select("col1").orderBy("col2").orderBy("col1").orderBy("col2").orderBy("col3")
+    checkAnswer(df2, Seq(Row(1), Row(4)))
+
+    val df3 = df.select("col1").as("q1")
+    checkError(
+      exception = intercept[AnalysisException] {
+        df3.orderBy("col2")
+      },
+      condition = "UNRESOLVED_COLUMN.WITH_SUGGESTION",
+      parameters = Map("objectName" -> "`col2`", "proposal" -> "`col1`")
+    )
+  }
+
+  test("Column reference above JOIN takes precedence over ALL keyword") {
+    val df1 = sql("select * from values(1, 2, 4) as t1(a, b, all1)")
+    val df2 = sql("select * from values(1, 3, 2) as t2(a, b, all)")
+    val df3 = df1.join(df2, df1("a") === df2("a"))
+    checkAnswer(df3.select(df2("all").as("all1")).orderBy("all"), Row(2))
+  }
+
+  test("Column reference takes precedence over ALL keyword with nested ORDER BY") {
+    val df = sql("SELECT * FROM VALUES(1, 5, 6), (4, 2, 3) as t(a, b, all)")
+
+    val df1 = df.select("a").orderBy("b").orderBy("all")
+    checkAnswer(df1, Seq(Row(4), Row(1)))
+  }
 }
 
 case class GroupByKey(a: Int, b: Int)
