@@ -798,6 +798,8 @@ case class UnresolvedStarWithColumns(
      explicitMetadata: Option[Seq[Metadata]] = None)
   extends UnresolvedStarBase {
 
+  final override val nodePatterns: Seq[TreePattern] = Seq(UNRESOLVED_STAR_WITH_COLUMNS)
+
   override def target: Option[Seq[String]] = None
   override def children: Seq[Expression] = exprs
 
@@ -859,6 +861,8 @@ case class UnresolvedStarWithColumnsRenames(
     newNames: Seq[String])
   extends LeafExpression with UnresolvedStarBase {
 
+  final override val nodePatterns: Seq[TreePattern] = Seq(UNRESOLVED_STAR_WITH_COLUMNS_RENAMES)
+
   override def target: Option[Seq[String]] = None
 
   override def expandStar(parameters: ExpandStarParameters): Seq[NamedExpression] = {
@@ -895,7 +899,10 @@ case class UnresolvedStarWithColumnsRenames(
  *              is a list of identifiers that is the path of the expansion.
  */
 case class UnresolvedStar(target: Option[Seq[String]])
-  extends LeafExpression with UnresolvedStarBase
+  extends LeafExpression with UnresolvedStarBase {
+
+  final override val nodePatterns: Seq[TreePattern] = Seq(UNRESOLVED_STAR)
+}
 
 /**
  * Represents all of the input attributes to a given relational operator, for example in
@@ -906,6 +913,9 @@ case class UnresolvedStar(target: Option[Seq[String]])
  */
 case class UnresolvedRegex(regexPattern: String, table: Option[String], caseSensitive: Boolean)
   extends LeafExpression with Star with Unevaluable {
+
+  final override val nodePatterns: Seq[TreePattern] = Seq(UNRESOLVED_REGEX)
+
   override def expandStar(parameters: ExpandStarParameters): Seq[NamedExpression] = {
     val pattern = if (caseSensitive) regexPattern else s"(?i)$regexPattern"
     table match {
@@ -966,6 +976,7 @@ case class MultiAlias(child: Expression, names: Seq[String])
  */
 case class ResolvedStar(expressions: Seq[NamedExpression])
   extends LeafExpression with Star with Unevaluable {
+  final override val nodePatterns: Seq[TreePattern] = Seq(RESOLVED_STAR)
   override def newInstance(): NamedExpression = throw new UnresolvedException("newInstance")
   override def expandStar(parameters: ExpandStarParameters): Seq[NamedExpression] = expressions
   override def toString: String = expressions.mkString("ResolvedStar(", ", ", ")")
