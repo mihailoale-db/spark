@@ -647,6 +647,8 @@ case class UnresolvedStarExceptOrReplace(
     replacements: Option[Seq[NamedExpression]])
   extends LeafExpression with UnresolvedStarBase {
 
+  final override val nodePatterns: Seq[TreePattern] = Seq(UNRESOLVED_STAR_EXCEPT_OR_REPLACE)
+
   /**
    * We expand the * EXCEPT by the following three steps:
    * 1. use the original .expandStar() to get top-level column list or struct expansion

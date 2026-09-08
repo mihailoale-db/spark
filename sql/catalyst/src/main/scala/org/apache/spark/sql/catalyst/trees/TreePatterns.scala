@@ -131,6 +131,7 @@ object TreePattern extends Enumeration  {
   val UNRESOLVED_IDENTIFIER: Value = Value
   val UNRESOLVED_ORDINAL: Value = Value
   val UNRESOLVED_PLAN_ID: Value = Value
+  val UNRESOLVED_STAR_EXCEPT_OR_REPLACE: Value = Value
   val UNRESOLVED_WINDOW_EXPRESSION: Value = Value
 
   // Execution expression patterns (alphabetically ordered)
